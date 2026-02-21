@@ -1,131 +1,95 @@
-# 🔍 Checkr.ai : Instagram Fact-Checker
+# 🔍 Project Atlas (Beta)
+**Real-time fact-checking for Instagram comments**
 
-Tag `@CheckrAI` in any Instagram comment → the bot reads the claim, searches the web, and replies with a sourced verdict.
+Project Atlas is an AI-powered Instagram bot designed to combat misinformation in public discourse. Tag the bot in any thread, and it will analyze the claim, search for credible sources, and reply with a verified fact-check in seconds.
 
-**Stack:** FastAPI · GPT-4o-mini · Tavily · Meta Graph API
-
----
-
-## Files
-
-```
-checkr/
-├── main.py          ← entire app (one file)
-├── .env.example     ← copy to .env and fill in keys
-├── requirements.txt
-├── railway.toml     ← deploy to Railway in one command
-└── .gitignore
-```
+> [!IMPORTANT]
+> **Beta Status:** This project is currently in private beta during the **Meta App Review** process. Public access is currently limited to whitelisted accounts.
 
 ---
 
-## Local Setup
+## 🚀 Core Features
 
-```bash
-# 1. Install deps
-pip install -r requirements.txt
+- **Contextual Awareness:** Reads parent comments and post captions to understand the nuance behind a claim.
+- **Live Verification:** Searches the web in real-time for current, credible information.
+- **Automated Citations:** Provides a clear verdict with links to high-authority sources.
+- **Performance Optimized:** Uses intelligent caching for recurring claims to provide near-instant replies.
+- **Abuse Prevention:** Implements rate limiting and spam filtering to maintain thread integrity.
 
-# 2. Set up env
-cp .env.example .env
-# Fill in OPENAI_API_KEY and TAVILY_API_KEY at minimum
-
-# 3. Run
-uvicorn main:app --reload
-
-# 4. Test the fact-check pipeline (no Instagram needed)
-curl -X POST http://localhost:8000/test \
-  -H "Content-Type: application/json" \
-  -d '{"claim": "The Great Wall of China is visible from space"}'
-```
+### **Tech Stack**
+- **Framework:** FastAPI
+- **LLM:** Groq (Llama 3.3 70B)
+- **Search:** Tavily Search
+- **Platform:** Instagram Business API
 
 ---
 
-## API Keys
+## 🛠 How to Use (Beta)
 
-| Key | Where to get | Free tier |
-|-----|-------------|-----------|
-| `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com/api-keys) | Pay per use (~$0.001/check) |
-| `TAVILY_API_KEY` | [tavily.com](https://tavily.com) | 1,000 searches/month |
-| `ACCESS_TOKEN` | Meta Developer Dashboard | Free |
-| `APP_SECRET` | Meta Developer Dashboard | Free |
-| `PAGE_ID` | Meta Developer Dashboard | Free |
+Tag the bot handle (e.g., `@bot_handle`) in a comment. The system supports three primary interaction patterns:
 
----
+### 1. Inline Claims
+Submit a claim directly within your comment.
+> **Example:** `@bot_handle the moon is made of green cheese`
 
-## Instagram / Meta Setup
+### 2. Reply to a Comment
+Reply to a specific comment with just the tag. The bot will automatically verify the content of the parent comment.
+> **Example:** `@bot_handle fact check this`
 
-### 1. Create a Meta Developer App
-- [developers.facebook.com](https://developers.facebook.com) → Create App → Business type
-- Add the **Instagram** product
-
-### 2. Connect your Instagram Professional Account
-- Instagram → API Setup → connect your account
-- Copy: **App Secret**, **Page Access Token**, **Instagram Business Account ID** → paste into `.env`
-
-### 3. Register the Webhook
-- Webhooks → Add Subscription → Instagram
-- Callback URL: `https://your-deployed-url.com/webhook`
-- Verify Token: matches `VERIFY_TOKEN` in your `.env`
-- Subscribe to fields: `mentions`, `comments`
-
-### 4. Test locally with ngrok
-```bash
-ngrok http 8000
-# Use the https:// URL as your webhook callback URL
-```
+### 3. Verify Post Captions
+Comment on a post where the main caption contains a claim.
+> **Example:** `@bot_handle is this true?`
 
 ---
 
-## Deploy to Railway
+## ⚖️ Verdict Types
 
-```bash
-npm install -g @railway/cli
-railway login
-railway init
-railway up
-```
 
-Add all `.env` values in the Railway dashboard → Variables.
 
-Your webhook URL: `https://your-app.up.railway.app/webhook`
-
----
-
-## Beta (Dev Mode — No App Review)
-
-Works immediately for up to **25 whitelisted testers**:
-- Meta Dashboard → Roles → Add testers (Instagram accounts)
-- Those accounts can tag `@CheckrAI` and the bot will respond
-- Random strangers tagging you → not received until App Review is approved
-
-**Submit App Review in Week 2.** Use case: *"Public interest fact-checking bot."* Takes 1–4 weeks.
+| Emoji | Label | Meaning |
+|:---:|:--- |:--- |
+| ✅ | **TRUE** | The claim is accurate and supported by credible sources. |
+| ❌ | **FALSE** | The claim is contradicted by reliable sources. |
+| ⚠️ | **MISLEADING** | The claim is partly true but lacks critical context. |
+| ❓ | **UNVERIFIABLE** | Insufficient evidence exists to confirm or deny the claim. |
+| 💬 | **NOT_A_CLAIM** | The input is an opinion, question, or subjective statement. |
 
 ---
 
-## Verdicts
+## 📝 Example Interaction
 
-| Label | Emoji | Meaning |
-|-------|-------|---------|
-| `TRUE` | ✅ | Accurate, well-sourced |
-| `FALSE` | ❌ | Contradicted by sources |
-| `MISLEADING` | ⚠️ | True but missing context |
-| `UNVERIFIABLE` | ❓ | Insufficient evidence |
-| `NOT_A_CLAIM` | 💬 | Opinion / question — can't be checked |
+**User:** `@username`
+**Project Atlas:**
+> 🔍 **Fact Check:** ❌ **FALSE**
+>
+> The original 1998 study linking vaccines to autism was retracted, and large-scale reviews involving millions of children have found no link.
+>
+> **Sources:**
+> - [Reuters - Fact Check Link](https://www.reuters.com/...)
+> - [World Health Organization - Vaccine Safety](https://www.who.int/...)
+>
+> *— Project Atlas (Beta)*
 
 ---
 
-## Example Reply
+## 🛡 Safety & Responsible Use
 
-```
-@username
-🔍 Fact Check: ❌ FALSE
+- **Anti-Hallucination:** The bot is strictly constrained to cite only links returned from live web searches.
+- **Privacy:** Personal data and metadata within comments are ignored and never stored.
+- **Human-Centric:** Designed to provide context for better discussion, not to act as a final arbiter of truth.
 
-The original 1998 study linking vaccines to autism was retracted.
-Large-scale reviews find no connection.
+---
 
-📎 Sources:
-https://pubmed.ncbi.nlm.nih.gov/...
-https://www.who.int/...
+## 🗺 Roadmap
 
-— Checkr.ai
-```
+- [ ] **Public Launch:** Full release following Meta App Review.
+- [ ] **Visual Verification:** Support for checking claims within images and screenshots.
+- [ ] **Multilingual Support:** Fact-checking capabilities for non-English claims.
+- [ ] **Public Archive:** A searchable database of previously verified claims.
+- [ ] **Creator Tools:** Dashboards for influencers and journalists to monitor their comment sections.
+
+---
+
+## 📬 Contact
+
+For beta participants reporting bugs or users requesting access, please reach out via the **Project Repository Issues** or the official **Instagram page** linked to the bot.
