@@ -1,4 +1,4 @@
-# 🔍 Checkr.ai — Instagram Fact-Checking Bot
+# 🔍 Checkr.ai : Instagram Fact-Checker
 
 Tag `@CheckrAI` in any Instagram comment → the bot reads the claim, searches the web, and replies with a sourced verdict.
 
