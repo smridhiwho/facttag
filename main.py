@@ -1,5 +1,3 @@
-
-
 """
 Checkr.ai — Instagram Fact-Checking Bot
 Monolithic FastAPI app. One file. No microservices.
@@ -17,11 +15,12 @@ import hmac
 import json
 import logging
 import os
+
+load_dotenv()
 import re
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from typing import Optional
-load_dotenv()
 
 import httpx
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
@@ -367,11 +366,16 @@ async def webhook(request: Request, bg: BackgroundTasks):
             user_id    = from_.get("id")
             username   = from_.get("username")
 
+            # ── Ignore the bot's own comments to prevent infinite loop ──
+            if user_id == IG_USER_ID or from_.get("self_ig_scoped_id"):
+                log.info(f"Skipping bot's own comment from {username}")
+                continue
+
             # @mention in caption or comment on ANY public post
             if field == "mentions" and media_id:
                 bg.add_task(handle_mention, media_id, comment_id, text, user_id, username)
 
-            # Comment on the bot's own post
+            # Comment containing @thehalfstackgirl
             elif field == "comments":
                 media_id   = value.get("media", {}).get("id", "") or media_id
                 comment_id = value.get("id", "")
